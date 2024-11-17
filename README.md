@@ -1,12 +1,8 @@
-[![openupm](https://img.shields.io/npm/v/dev.chsxf.autoscene?label=openupm&registry_uri=https://package.openupm.com)](https://openupm.com/packages/dev.chsxf.autoscene/)
-
 # ❓ About AutoScene
 
+Forked from : https://github.com/chsxf/AutoScene
+
 AutoScene allows you to work on your scene setup in the editor while loading a specific scene when entering Play mode.
-
-## Conventions
-
-This project uses [gitmoji](https://gitmoji.dev) for its commit messages.
 
 # 🖥 Requirements
 

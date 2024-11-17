@@ -3,38 +3,45 @@ using System.Collections.Generic;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 
-namespace chsxf
+namespace PixelWizards
 {
     [InitializeOnLoad]
     public static class AutoScene
     {
-        private const string MENUITEM_PREFIX = "Tools/AutoScene (" + AutoSceneSettings.VERSION + ")/";
+        private const string MENUITEM_PREFIX = "Tools/AutoScene/";
         private const string SETTINGS_PROVIDER_PATH = "AutoScene";
 
         private static AutoSceneSettings settings = null;
 
         public static bool IsEnabled => settings.Enabled;
 
-        static AutoScene() {
+        static AutoScene()
+        {
             settings = AutoSceneSettings.LoadSettings();
 
             EditorBuildSettings.sceneListChanged += UpdatePlayModeStartScene;
             UpdatePlayModeStartScene();
         }
 
-        private static void UpdatePlayModeStartScene() {
+        private static void UpdatePlayModeStartScene()
+        {
             SceneAsset sceneAsset = null;
 
-            if (IsEnabled) {
-                if (settings.LoadedScene == "auto") {
-                    foreach (EditorBuildSettingsScene scene in EditorBuildSettings.scenes) {
-                        if (scene.enabled) {
+            if (IsEnabled)
+            {
+                if (settings.LoadedScene == "auto")
+                {
+                    foreach (EditorBuildSettingsScene scene in EditorBuildSettings.scenes)
+                    {
+                        if (scene.enabled)
+                        {
                             sceneAsset = AssetDatabase.LoadAssetAtPath<SceneAsset>(scene.path);
                             break;
                         }
                     }
                 }
-                else if (settings.LoadedScene != "none") {
+                else if (settings.LoadedScene != "none")
+                {
                     sceneAsset = AssetDatabase.LoadAssetAtPath<SceneAsset>(settings.LoadedScene);
                 }
             }
@@ -43,58 +50,71 @@ namespace chsxf
         }
 
         [MenuItem(MENUITEM_PREFIX + "Open Settings...")]
-        private static void OpenSettings() {
+        private static void OpenSettings()
+        {
             SettingsService.OpenUserPreferences(SETTINGS_PROVIDER_PATH);
         }
 
         [MenuItem(MENUITEM_PREFIX + "Disable")]
-        public static void DisableAutoScene() {
+        public static void DisableAutoScene()
+        {
             settings.Enabled = false;
             UpdatePlayModeStartScene();
         }
 
         [MenuItem(MENUITEM_PREFIX + "Disable", true)]
-        private static bool CanDisableAutoScene() {
+        private static bool CanDisableAutoScene()
+        {
             return IsEnabled;
         }
 
         [MenuItem(MENUITEM_PREFIX + "Enable")]
-        public static void EnableAutoScene() {
+        public static void EnableAutoScene()
+        {
             settings.Enabled = true;
             UpdatePlayModeStartScene();
         }
 
         [MenuItem(MENUITEM_PREFIX + "Enable", true)]
-        private static bool CanEnableAutoScene() {
+        private static bool CanEnableAutoScene()
+        {
             return !IsEnabled;
         }
 
         [SettingsProvider]
-        public static SettingsProvider AutoSceneSettingsProvider() {
-            SettingsProvider provider = new SettingsProvider(SETTINGS_PROVIDER_PATH, SettingsScope.User) {
+        public static SettingsProvider AutoSceneSettingsProvider()
+        {
+            SettingsProvider provider = new SettingsProvider(SETTINGS_PROVIDER_PATH, SettingsScope.User)
+            {
                 keywords = new HashSet<string>(new[] { "scene", "autoscene", "play mode" }),
 
-                guiHandler = (searchContext) => {
+                guiHandler = (searchContext) =>
+                {
                     EditorGUILayout.LabelField("Version", AutoSceneSettings.VERSION, EditorStyles.boldLabel);
                     EditorGUILayout.Space();
 
                     // Build scene list
                     string[] sceneGuids = AssetDatabase.FindAssets("t:Scene");
                     string[] scenePathes = new string[sceneGuids.Length];
-                    for (int i = 0; i < sceneGuids.Length; i++) {
+                    for (int i = 0; i < sceneGuids.Length; i++)
+                    {
                         scenePathes[i] = AssetDatabase.GUIDToAssetPath(sceneGuids[i]);
                     }
+
                     Array.Sort(scenePathes, string.Compare);
 
                     // Finding selected index
                     string prefsValue = settings.LoadedScene;
                     int selectedIndex = 0;
-                    if (prefsValue == "auto") {
+                    if (prefsValue == "auto")
+                    {
                         selectedIndex = 1;
                     }
-                    else {
+                    else
+                    {
                         int arrayIndex = Array.IndexOf(scenePathes, prefsValue);
-                        if (arrayIndex >= 0) {
+                        if (arrayIndex >= 0)
+                        {
                             selectedIndex = arrayIndex + 2;
                         }
                     }
@@ -112,14 +132,18 @@ namespace chsxf
 
                     selectedIndex = EditorGUILayout.Popup("Scene to load on Play", selectedIndex, menuEntries);
 
-                    if (EditorGUI.EndChangeCheck()) {
-                        if (selectedIndex == 0) {
+                    if (EditorGUI.EndChangeCheck())
+                    {
+                        if (selectedIndex == 0)
+                        {
                             prefsValue = "none";
                         }
-                        else if (selectedIndex == 1) {
+                        else if (selectedIndex == 1)
+                        {
                             prefsValue = "auto";
                         }
-                        else {
+                        else
+                        {
                             prefsValue = menuEntries[selectedIndex];
                         }
 
@@ -129,15 +153,24 @@ namespace chsxf
                     }
 
                     string helpBoxMessage;
-                    if (selectedIndex == 0) {
-                        helpBoxMessage = "The scenes currently loaded in the editor will be maintained when entering Play mode.\n\nThis is the default Unity behaviour.";
+                    if (selectedIndex == 0)
+                    {
+                        helpBoxMessage =
+                            "The scenes currently loaded in the editor will be maintained when entering Play mode.\n\nThis is the default Unity behaviour.";
                     }
-                    else if (selectedIndex == 1) {
-                        helpBoxMessage = "The first enabled scene in the Build Settings box will be loaded when entering Play mode. If no such scene exists, falls back to 'None'.";
+                    else if (selectedIndex == 1)
+                    {
+                        helpBoxMessage =
+                            "The first enabled scene in the Build Settings box will be loaded when entering Play mode. If no such scene exists, falls back to 'None'.";
                     }
-                    else {
-                        helpBoxMessage = string.Format("The scene '{0}' will be loaded when entring Play mode. If the scene does not exist anymore, falls back to 'None'.", prefsValue);
+                    else
+                    {
+                        helpBoxMessage =
+                            string.Format(
+                                "The scene '{0}' will be loaded when entring Play mode. If the scene does not exist anymore, falls back to 'None'.",
+                                prefsValue);
                     }
+
                     EditorGUILayout.HelpBox(helpBoxMessage, MessageType.Info, wide: false);
 
                     EditorGUILayout.Space();
